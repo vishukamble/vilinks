@@ -96,7 +96,16 @@ function MaybePrettyUrl($prefix, $port) {
   $ans = Read-Host "Set up pretty URL http://$prefix/ (hosts + port 80 forward; requires Admin)? [y/N]"
   if ($ans -notmatch '^[Yy]') { return }
 
-  # Hosts file
+  $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+  ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+  if (-not $IsAdmin) {
+    Warn "Not running as Administrator. Re-run PowerShell as Admin to enable http://$prefix/."
+    Warn "No-admin URLs still work: http://$prefix`:$( $port )/  or  http://127.0.0.1:$port/"
+    return
+  }
+
+  # Add hosts entry
   $hosts = "$env:WINDIR\System32\drivers\etc\hosts"
   $entry = "127.0.0.1 $prefix"
   $content = Get-Content $hosts -ErrorAction Stop
@@ -108,14 +117,28 @@ function MaybePrettyUrl($prefix, $port) {
     Ok "Added hosts entry"
   }
 
-  $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
-  ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-  if (-not $IsAdmin) { throw "Run PowerShell as Administrator to set up http://vi/ (hosts + portproxy)." }
+  Info "Flushing DNS cache..."
+  ipconfig /flushdns | Out-Null
 
-  # Port 80 → $port using netsh portproxy
-  Info "Configuring portproxy 80 → $port..."
+  # Port 80 → app port using netsh portproxy
+  Info "Configuring portproxy 127.0.0.1:80 → 127.0.0.1:$port..."
+  & netsh interface portproxy delete v4tov4 listenaddress=127.0.0.1 listenport=80 2>$null | Out-Null
   & netsh interface portproxy add v4tov4 listenaddress=127.0.0.1 listenport=80 connectaddress=127.0.0.1 connectport=$port | Out-Null
-  Ok "Pretty URL enabled: http://$prefix/"
+
+  Info "Verifying http://$prefix/healthz ..."
+  try {
+    $resp = Invoke-WebRequest -UseBasicParsing -TimeoutSec 3 -Uri "http://$prefix/healthz"
+    if ($resp.StatusCode -ge 200 -and $resp.StatusCode -lt 400) {
+      Ok "Pretty URL enabled: http://$prefix/"
+    } else {
+      Warn "Portproxy configured but verification returned status $($resp.StatusCode)."
+      Warn "Try: http://$prefix/  or  http://127.0.0.1:$port/"
+    }
+  } catch {
+    Warn "Portproxy configured but verification failed."
+    Warn "Try: http://$prefix/  or  http://127.0.0.1:$port/"
+    Warn "If it still fails, ensure service 'iphlpsvc' (IP Helper) is running."
+  }
 }
 
 Write-Host ""
