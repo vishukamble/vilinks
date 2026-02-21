@@ -1,52 +1,63 @@
-$ErrorActionPreference = 'SilentlyContinue'
+$ErrorActionPreference = "Stop"
 
-function Is-Admin {
-  $id = [Security.Principal.WindowsIdentity]::GetCurrent()
-  $p = New-Object Security.Principal.WindowsPrincipal($id)
-  return $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+function Info($m){ Write-Host "→ $m" -ForegroundColor Cyan }
+function Ok($m){ Write-Host "✓ $m" -ForegroundColor Green }
+function Warn($m){ Write-Host "⚠ $m" -ForegroundColor Yellow }
+
+$InstallDir = $env:VILINKS_INSTALL_DIR
+if (-not $InstallDir) { $InstallDir = Join-Path $env:LOCALAPPDATA "vilinks" }
+
+$DataDir = $env:VILINKS_DATA_DIR
+if (-not $DataDir) { $DataDir = Join-Path $env:USERPROFILE ".vilinks" }
+
+$Pid1 = Join-Path $InstallDir "vilinks.pid"
+$Pid2 = Join-Path $DataDir "vilinks.pid"
+
+Info "Stopping Docker container (if any)..."
+if (Get-Command docker -ErrorAction SilentlyContinue) {
+  docker rm -f vilinks 2>$null | Out-Null
 }
 
-Write-Host "`nvilinks uninstaller`n" -ForegroundColor Cyan
-
-$repoDir = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$envFile = Join-Path $repoDir '.env'
-$hostName = 'vi'
-$port = 8765
-$dataDir = Join-Path $HOME '.vilinks'
-
-if (Test-Path $envFile) {
-  Get-Content $envFile | ForEach-Object {
-    if ($_ -match '^VILINKS_BASE_HOST=(.+)$') { $hostName = $Matches[1] }
-    if ($_ -match '^VILINKS_PORT=(.+)$') { $port = [int]$Matches[1] }
-    if ($_ -match '^VILINKS_DATA_DIR=(.+)$') { $dataDir = $Matches[1] }
+function Stop-PidFile($pidFile) {
+  if (Test-Path $pidFile) {
+    $pid = Get-Content $pidFile -ErrorAction SilentlyContinue
+    if ($pid) {
+      Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+    }
+    Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
   }
 }
 
-# Stop docker
-if (Get-Command docker -ErrorAction SilentlyContinue) {
-  docker rm -f vilinks | Out-Null
-  Push-Location $repoDir
-  docker compose down | Out-Null
-  Pop-Location
+Info "Stopping Python process (if any)..."
+Stop-PidFile $Pid1
+Stop-PidFile $Pid2
+Ok "Stopped"
+
+# Admin-only cleanup: portproxy + hosts
+$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if ($IsAdmin) {
+  Info "Removing portproxy 80->8765 (if present)..."
+  netsh interface portproxy delete v4tov4 listenaddress=127.0.0.1 listenport=80 2>$null | Out-Null
+
+  Info "Removing hosts entry for 'vi' (if present)..."
+  $hosts = "$env:WINDIR\System32\drivers\etc\hosts"
+  if (Test-Path $hosts) {
+    (Get-Content $hosts) |
+      Where-Object { $_ -notmatch '^\s*127\.0\.0\.1\s+vi(\s|$)' } |
+      Set-Content $hosts
+  }
+  Ok "Network hooks removed"
+} else {
+  Warn "Not running as Administrator: leaving hosts/portproxy intact."
+  Warn "If you want full cleanup, re-run uninstall.ps1 as Admin."
 }
 
-# Stop native
-$runPs1 = Join-Path $repoDir 'scripts\run.ps1'
-if (Test-Path $runPs1) {
-  & $runPs1 -Action stop -Port $port -HostName $hostName | Out-Null
-}
+Info "Removing install dir: $InstallDir"
+Remove-Item -Recurse -Force $InstallDir -ErrorAction SilentlyContinue
 
-$admin = Is-Admin
-if ($admin) {
-  # Remove portproxy
-  netsh interface portproxy delete v4tov4 listenaddress=127.0.0.1 listenport=80 | Out-Null
+Info "Removing data dir: $DataDir"
+Remove-Item -Recurse -Force $DataDir -ErrorAction SilentlyContinue
 
-  # Remove hosts entry
-  $hostsFile = "$env:WINDIR\System32\drivers\etc\hosts"
-  $line = "127.0.0.1 $hostName"
-  $content = Get-Content $hostsFile
-  $content | Where-Object { $_ -ne $line } | Set-Content -Path $hostsFile
-}
-
-Write-Host "Removed vilinks (data preserved at $dataDir)" -ForegroundColor Green
-Write-Host "To fully wipe: Remove-Item -Recurse -Force $dataDir" -ForegroundColor Yellow
+Ok "vilinks uninstalled"

@@ -59,8 +59,10 @@ function DockerUp {
   if (!(Get-Command docker -ErrorAction SilentlyContinue)) { Die "docker not found." }
   Info "Starting vilinks (Docker)..."
   Push-Location (Join-Path $InstallDir "src")
-  docker compose up -d --build | Out-Null
+  docker compose up -d --build
+  if ($LASTEXITCODE -ne 0) { throw "Docker failed to build/start. Fix error above and re-run." }
   Pop-Location
+
   Ok "vilinks is running (Docker)"
 }
 
@@ -105,6 +107,10 @@ function MaybePrettyUrl($prefix, $port) {
     Add-Content -Path $hosts -Value $entry
     Ok "Added hosts entry"
   }
+
+  $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+  ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+  if (-not $IsAdmin) { throw "Run PowerShell as Administrator to set up http://vi/ (hosts + portproxy)." }
 
   # Port 80 → $port using netsh portproxy
   Info "Configuring portproxy 80 → $port..."
