@@ -1,0 +1,10 @@
+title: vilinks
+description: "vilinks — a lightweight local go/ alternative URL shortener"
+theme: null
+markdown: kramdown
+plugins: []
+exclude:
+  - node_modules
+  - vendor
+  - Gemfile
+  - Gemfile.lock
