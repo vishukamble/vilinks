@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="help-header">
+    <h1><span class="gradient-text">How it works</span></h1>
+    <p>Create links in the UI, then use <code>{{ BASE_PREFIX }}alias</code> in your browser to redirect.</p>
+  </div>
+
+  <div class="help-grid">
+    <div class="help-card">
+      <div class="help-icon">➕</div>
+      <h3>Create</h3>
+      <p>Add an alias + destination URL. Aliases are lowercase, 2–40 chars, letters/numbers/hyphens.</p>
+      <div class="help-example">
+        <div class="example-row">
+          <span class="example-input">{{ BASE_PREFIX }}docs</span>
+          <span class="example-arrow">→</span>
+          <span class="example-dest">https://docs.example.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-icon">✏️</div>
+      <h3>Edit</h3>
+      <p>Use the <strong>Edit</strong> action to update destination or description.</p>
+    </div>
+
+    <div class="help-card">
+      <div class="help-icon">🗑️</div>
+      <h3>Delete</h3>
+      <p>Delete removes the alias from the DB. Backups are JSON exports.</p>
+    </div>
+
+    <div class="help-card">
+      <div class="help-icon">🩺</div>
+      <h3>Health</h3>
+      <p>Use this for scripts / checks.</p>
+      <div class="code-block">
+        <code>curl -s http://localhost:8765/healthz</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-footer">
+    <a href="/">← Back</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ BASE_PREFIX }} links{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <div class="navbar-logo">{{ BASE_PREFIX }}</div>
+      <span class="navbar-title">links<span> · local shortener</span></span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="/" id="nav-links" class="{% block nav_links_class %}{% endblock %}">🔗 Links</a></li>
+      <li><a href="/#create" id="nav-create" onclick="focusCreate(event)" class="{% block nav_create_class %}{% endblock %}">＋ Create</a></li>
+      <li><a href="/help" id="nav-help" class="{% block nav_help_class %}{% endblock %}">？ Help</a></li>
+    </ul>
+  </nav>
+
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    // Highlight active nav item
+    const path = window.location.pathname;
+    if (path === '/help') document.getElementById('nav-help').classList.add('active');
+    else document.getElementById('nav-links').classList.add('active');
+
+    function focusCreate(e) {
+      e.preventDefault();
+      const el = document.querySelector('input[name="slug"]');
+      if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      else window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if errors %}
+    <div class="alert-error">
+      <ul class="help-list">
+        {% for e in errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon blue">🔗</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_links }}</h3>
+        <p>Total links</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon teal">📈</div>
+      <div class="stat-info">
+        <h3>{{ stats.total_hits }}</h3>
+        <p>Total hits</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">🕒</div>
+      <div class="stat-info">
+        <h3>{% if stats.latest_created %}✓{% else %}—{% endif %}</h3>
+        <p>Latest created</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple">🚀</div>
+      <div class="stat-info">
+        <h3>{% if stats.latest_hit %}✓{% else %}—{% endif %}</h3>
+        <p>Latest hit</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container" id="create">
+    <div class="table-header">
+      <h2>Links</h2>
+      <div class="table-badge">{{ BASE_PREFIX }} → http(s)://…</div>
+    </div>
+
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--surface-3);">
+      <form class="form-grid" method="POST" action="/links">
+        <div class="form-field">
+          <label>Alias</label>
+          <div class="input-prefix-wrap">
+            <div class="input-prefix">{{ BASE_PREFIX }}</div>
+            <input type="text" name="slug" placeholder="docs" value="{{ form.slug if form else '' }}" required>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Destination</label>
+          <input type="url" name="url" placeholder="https://example.com" value="{{ form.url if form else '' }}" required>
+        </div>
+        <div class="form-field">
+          <label>Description</label>
+          <input type="text" name="description" placeholder="(optional)" value="{{ form.description if form else '' }}">
+        </div>
+        <div class="form-field form-field-action">
+          <button class="scan-btn" type="submit">Create</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-scroll">
+      {% if links|length == 0 %}
+        <div class="empty-state">
+          <h3>No links yet</h3>
+          <p>Create your first short link above.</p>
+        </div>
+      {% else %}
+        <table>
+          <thead>
+            <tr>
+              <th>Alias</th>
+              <th>Destination</th>
+              <th>Description</th>
+              <th>Hits</th>
+              <th>Created</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in links %}
+              <tr>
+                <td>
+                  <a class="alias-link" href="/{{ l.slug }}" title="Open {{ BASE_PREFIX }}{{ l.slug }}">
+                    <span class="alias-prefix">{{ BASE_PREFIX }}</span>{{ l.slug }}
+                  </a>
+                </td>
+                <td>
+                  <a class="dest-link" href="{{ l.url }}" target="_blank" rel="noopener noreferrer">{{ l.url }}</a>
+                </td>
+                <td class="desc-cell">{{ l.description or '' }}</td>
+                <td>
+                  {% if l.hit_count and l.hit_count > 0 %}
+                    <span class="hit-badge hit-active">{{ l.hit_count }}</span>
+                  {% else %}
+                    <span class="hit-badge">0</span>
+                  {% endif %}
+                </td>
+                <td class="date-cell">{{ l.created_at }}</td>
+                <td class="action-cell">
+                  <button class="action-btn edit-btn" type="button" data-edit="{{ l.slug }}">Edit</button>
+                  <form method="POST" action="/links/{{ l.slug }}" style="display:inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button class="action-btn delete-btn" type="submit" onclick="return confirm('Delete {{ BASE_PREFIX }}{{ l.slug }}?');">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <tr class="edit-row" id="edit-{{ l.slug }}" style="display:none;">
+                <td colspan="6">
+                  <form method="POST" action="/links/{{ l.slug }}" class="edit-grid">
+                    <input type="hidden" name="_method" value="PUT">
+                    <div class="form-field">
+                      <label>Destination</label>
+                      <input type="url" name="url" value="{{ l.url }}" required>
+                    </div>
+                    <div class="form-field">
+                      <label>Description</label>
+                      <input type="text" name="description" value="{{ l.description or '' }}">
+                    </div>
+                    <div class="edit-actions">
+                      <button class="scan-btn" type="submit">Save</button>
+                      <button class="cancel-btn" type="button" data-cancel="{{ l.slug }}">Cancel</button>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    // Inline edit toggles
+    const openRow = (slug) => {
+      const row = document.getElementById('edit-' + slug);
+      if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+    };
+
+    document.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openRow(btn.getAttribute('data-edit')));
+    });
+    document.querySelectorAll('[data-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const slug = btn.getAttribute('data-cancel');
+        const row = document.getElementById('edit-' + slug);
+        if (row) row.style.display = 'none';
+      });
+    });
+  </script>
+
+{% endblock %}
