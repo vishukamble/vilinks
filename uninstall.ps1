@@ -1,15 +1,28 @@
+# uninstall.ps1
+# One-shot uninstaller for vilinks (Windows)
+# - Stops Docker container if present (does not fail if missing)
+# - Stops native Python process via pid files (InstallDir + DataDir)
+# - Fallback: kills anything LISTENING on VILINKS_PORT (default 8765)
+# - If run as Admin: removes portproxy + hosts entry for prefix
+# - Removes install + data directories
+#
+# One-liner:
+# powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/uninstall.ps1 | iex"
+
 $ErrorActionPreference = "Stop"
 
 function Info($m){ Write-Host "-> $m" -ForegroundColor Cyan }
 function Ok($m){ Write-Host "[OK] $m" -ForegroundColor Green }
 function Warn($m){ Write-Host "[!!] $m" -ForegroundColor Yellow }
 
+# Resolve dirs
 $InstallDir = $env:VILINKS_INSTALL_DIR
 if (-not $InstallDir) { $InstallDir = Join-Path $env:LOCALAPPDATA "vilinks" }
 
 $DataDir = $env:VILINKS_DATA_DIR
 if (-not $DataDir) { $DataDir = Join-Path $env:USERPROFILE ".vilinks" }
 
+# Load config (DataDir preferred, then InstallDir)
 $CfgCandidates = @(
   (Join-Path $DataDir "config.env"),
   (Join-Path $InstallDir "config.env")
@@ -21,7 +34,6 @@ $Prefix = "vi"
 
 function Load-EnvFile($path) {
   if (!(Test-Path $path)) { return }
-
   Info ("Loading config: {0}" -f $path)
   Get-Content $path | ForEach-Object {
     $line = $_.Trim()
@@ -32,7 +44,6 @@ function Load-EnvFile($path) {
   }
 }
 
-# Load config if present (DataDir preferred)
 foreach ($cfg in $CfgCandidates) { Load-EnvFile $cfg }
 
 if ($env:VILINKS_PORT)   { $Port = [int]$env:VILINKS_PORT }
@@ -55,6 +66,10 @@ function Stop-ByPort($port) {
   $pids = @()
 
   foreach ($line in (netstat -ano)) {
+    # Examples:
+    # TCP    127.0.0.1:8765     0.0.0.0:0      LISTENING       1234
+    # TCP    0.0.0.0:8765       0.0.0.0:0      LISTENING       1234
+    # TCP    [::]:8765          [::]:0         LISTENING       1234
     if ($line -match ("TCP\s+127\.0\.0\.1:{0}\s+.*LISTENING\s+(\d+)$" -f $port)) { $pids += [int]$Matches[1] }
     if ($line -match ("TCP\s+0\.0\.0\.0:{0}\s+.*LISTENING\s+(\d+)$" -f $port))     { $pids += [int]$Matches[1] }
     if ($line -match ("TCP\s+\[::\]:{0}\s+.*LISTENING\s+(\d+)$" -f $port))         { $pids += [int]$Matches[1] }
@@ -63,16 +78,6 @@ function Stop-ByPort($port) {
   $pids = $pids | Sort-Object -Unique
   foreach ($procId in $pids) {
     Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
-  }
-
-  if ($pids.Count -gt 0) {
-    Ok ("Stopped processes on port {0}: {1}" -f $port, ($pids -join ", "))
-  }
-}
-
-  $pids = $pids | Sort-Object -Unique
-  foreach ($procId in $pids) {
-    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
   }
 
   if ($pids.Count -gt 0) {
@@ -92,7 +97,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
   Warn "Docker not found; skipping Docker cleanup"
 }
 
-Info "Stopping Python process (pid files if present)..."
+Info "Stopping native Python process (pid files if present)..."
 Stop-PidFile $Pid1
 Stop-PidFile $Pid2
 
