@@ -73,7 +73,7 @@ write_config() {
 VILINKS_PREFIX=$prefix
 VILINKS_PORT=$port
 VILINKS_DB=$DATA_DIR/vilinks.db
-VILINKS_BASE_URL=http://${prefix}.localhost:${port}/
+VILINKS_BASE_URL=http://127.0.0.1:${port}/
 EOF
   ok "Config → $CFG_FILE"
 }
@@ -157,8 +157,15 @@ run_docker() {
   local c; c="$(compose_cmd)"
   [[ -n "$c" ]] || die "Docker Compose not found. Install Docker Desktop / docker compose."
 
+  # Export config so docker-compose.yml can use it
+  set -a
+  # shellcheck disable=SC1090
+  export VILINKS_DATA_DIR="$DATA_DIR"
+  source "$CFG_FILE"
+  set +a
+
   info "Starting vilinks (Docker)..."
-  (cd "$INSTALL_DIR/src" && $c up -d --build)
+  (cd "$INSTALL_DIR/src" && $c up -d --build) || die "Docker failed to start"
   ok "vilinks is running (Docker)"
 }
 
@@ -221,7 +228,9 @@ main() {
   choice="${choice:-1}"
 
   # Always provide no-admin URL that works everywhere:
-  local fallback_url="http://${prefix}.localhost:${port}/"
+  local fallback_url="http://127.0.0.1:${port}/"
+  echo "Open:            http://127.0.0.1:${port}/"
+  echo "Open (alt):      http://localhost:${port}/"
 
   # Start service
   if [[ "$choice" == "1" ]]; then
