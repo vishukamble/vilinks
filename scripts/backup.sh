@@ -1,7 +1,17 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-DB="${VILINKS_DB:-$HOME/.vilinks/vilinks.db}"
+DATA_DIR="${VILINKS_DATA_DIR:-$HOME/.vilinks}"
+CFG_FILE="${VILINKS_CONFIG:-$DATA_DIR/config.env}"
+
+if [[ -f "$CFG_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$CFG_FILE"
+  set +a
+fi
+
+DB="${VILINKS_DB:-$DATA_DIR/vilinks.db}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${1:-vilinks-backup-$TIMESTAMP.json}"
 

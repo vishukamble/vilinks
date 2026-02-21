@@ -46,7 +46,7 @@
   <div class="table-container" id="create">
     <div class="table-header">
       <h2>Links</h2>
-      <div class="table-badge">{{ BASE_PREFIX }} → http(s)://…</div>
+      <div class="table-badge">{{ prefix_slash }} → http(s)://…</div>
     </div>
 
     <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--surface-3);">
@@ -54,7 +54,7 @@
         <div class="form-field">
           <label>Alias</label>
           <div class="input-prefix-wrap">
-            <div class="input-prefix">{{ BASE_PREFIX }}</div>
+            <div class="input-prefix">{{ prefix_slash }}</div>
             <input type="text" name="slug" placeholder="docs" value="{{ form.slug if form else '' }}" required>
           </div>
         </div>
@@ -94,8 +94,8 @@
             {% for l in links %}
               <tr>
                 <td>
-                  <a class="alias-link" href="/{{ l.slug }}" title="Open {{ BASE_PREFIX }}{{ l.slug }}">
-                    <span class="alias-prefix">{{ BASE_PREFIX }}</span>{{ l.slug }}
+                  <a class="alias-link" href="/{{ l.slug }}" title="Open {{ prefix_slash }}{{ l.slug }}">
+                    <span class="alias-prefix">{{ prefix_slash }}</span>{{ l.slug }}
                   </a>
                 </td>
                 <td>
@@ -114,10 +114,11 @@
                   <button class="action-btn edit-btn" type="button" data-edit="{{ l.slug }}">Edit</button>
                   <form method="POST" action="/links/{{ l.slug }}" style="display:inline;">
                     <input type="hidden" name="_method" value="DELETE">
-                    <button class="action-btn delete-btn" type="submit" onclick="return confirm('Delete {{ BASE_PREFIX }}{{ l.slug }}?');">Delete</button>
+                    <button class="action-btn delete-btn" type="submit" onclick="return confirm('Delete {{ prefix_slash }}{{ l.slug }}?');">Delete</button>
                   </form>
                 </td>
               </tr>
+
               <tr class="edit-row" id="edit-{{ l.slug }}" style="display:none;">
                 <td colspan="6">
                   <form method="POST" action="/links/{{ l.slug }}" class="edit-grid">
@@ -145,7 +146,6 @@
   </div>
 
   <script>
-    // Inline edit toggles
     const openRow = (slug) => {
       const row = document.getElementById('edit-' + slug);
       if (row) row.style.display = row.style.display === 'none' ? '' : 'none';

@@ -1,15 +1,19 @@
 services:
   vilinks:
     build:
-      context: ../../../Downloads/Compressed/vilinks/vilinks
+      context: .
       dockerfile: docker/Dockerfile
     container_name: vilinks
+    restart: unless-stopped
     ports:
       - "127.0.0.1:${VILINKS_PORT:-8765}:8765"
     environment:
       VILINKS_BIND: "0.0.0.0"
       VILINKS_PORT: "8765"
       VILINKS_DB: "/data/vilinks.db"
-      VILINKS_BASE_HOST: "${VILINKS_BASE_HOST:-vi}"
+      VILINKS_PREFIX: "${VILINKS_PREFIX:-vi}"
+      # For display/copy in UI (host-side port)
+      VILINKS_BASE_URL: "http://${VILINKS_PREFIX:-vi}.localhost:${VILINKS_PORT:-8765}/"
     volumes:
+      # Default to ~/.vilinks if user sets VILINKS_DATA_DIR, else use repo-local ./.data
       - "${VILINKS_DATA_DIR:-./.data}:/data"

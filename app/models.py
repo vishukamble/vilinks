@@ -44,20 +44,21 @@ def record_hit(slug: str) -> None:
         )
 
 
-def get_stats() -> dict:
+def get_stats():
     with get_db() as conn:
-        total_links = conn.execute("SELECT COUNT(*) AS c FROM links").fetchone()["c"]
-        total_hits = conn.execute("SELECT COALESCE(SUM(hit_count),0) AS s FROM links").fetchone()["s"]
-        latest_created = conn.execute(
-            "SELECT created_at FROM links ORDER BY created_at DESC LIMIT 1"
-        ).fetchone()
-        latest_hit = conn.execute(
-            "SELECT last_hit_at FROM links WHERE last_hit_at IS NOT NULL ORDER BY last_hit_at DESC LIMIT 1"
+        row = conn.execute(
+            """
+            SELECT
+              (SELECT COUNT(*) FROM links) AS total_links,
+              (SELECT COALESCE(SUM(hit_count), 0) FROM links) AS total_hits,
+              (SELECT MAX(created_at) FROM links) AS latest_created,
+              (SELECT MAX(last_hit_at) FROM links) AS latest_hit
+            """
         ).fetchone()
 
-    return {
-        "total_links": int(total_links or 0),
-        "total_hits": int(total_hits or 0),
-        "latest_created": latest_created["created_at"] if latest_created else None,
-        "latest_hit": latest_hit["last_hit_at"] if latest_hit else None,
-    }
+        return {
+            "total_links": row["total_links"],
+            "total_hits": row["total_hits"],
+            "latest_created": row["latest_created"],
+            "latest_hit": row["latest_hit"],
+        }

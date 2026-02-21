@@ -89,9 +89,9 @@ def update(slug):
 
 # --- Redirect (catch-all, must be last) ---
 
-
 @bp.route("/<slug>")
 def redirect_slug(slug):
+    slug = slug.strip().lower()
     link = get_link(slug)
     if not link:
         return render_template("404.html", slug=slug), 404
