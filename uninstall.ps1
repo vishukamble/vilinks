@@ -43,9 +43,9 @@ $Pid2 = Join-Path $DataDir "vilinks.pid"
 
 function Stop-PidFile($pidFile) {
   if (Test-Path $pidFile) {
-    $pid = Get-Content $pidFile -ErrorAction SilentlyContinue
-    if ($pid) {
-      Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+    $procId = Get-Content $pidFile -ErrorAction SilentlyContinue
+    if ($procId) {
+      Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
     }
     Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
   }
@@ -55,17 +55,23 @@ function Stop-ByPort($port) {
   $pids = @()
 
   foreach ($line in (netstat -ano)) {
-    # Examples:
-    # TCP    127.0.0.1:8765     0.0.0.0:0      LISTENING       1234
-    # TCP    0.0.0.0:8765       0.0.0.0:0      LISTENING       1234
-    # TCP    [::]:8765          [::]:0         LISTENING       1234
     if ($line -match ("TCP\s+127\.0\.0\.1:{0}\s+.*LISTENING\s+(\d+)$" -f $port)) { $pids += [int]$Matches[1] }
     if ($line -match ("TCP\s+0\.0\.0\.0:{0}\s+.*LISTENING\s+(\d+)$" -f $port))     { $pids += [int]$Matches[1] }
     if ($line -match ("TCP\s+\[::\]:{0}\s+.*LISTENING\s+(\d+)$" -f $port))         { $pids += [int]$Matches[1] }
   }
 
   $pids = $pids | Sort-Object -Unique
-  foreach ($pid in $pids) {
+  foreach ($procId in $pids) {
+    Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+  }
+
+  if ($pids.Count -gt 0) {
+    Ok ("Stopped processes on port {0}: {1}" -f $port, ($pids -join ", "))
+  }
+}
+
+  $pids = $pids | Sort-Object -Unique
+  foreach ($procId in $pids) {
     Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
   }
 
