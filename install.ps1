@@ -57,11 +57,18 @@ VILINKS_DB=$DataDir\vilinks.db
 
 function DockerUp {
   if (!(Get-Command docker -ErrorAction SilentlyContinue)) { Die "docker not found." }
+
+  docker info *> $null
+  if ($LASTEXITCODE -ne 0) { Die "Docker is installed but not running. Start Docker Desktop first." }
+
   Info "Starting vilinks (Docker)..."
   Push-Location (Join-Path $InstallDir "src")
-  docker compose up -d --build
-  if ($LASTEXITCODE -ne 0) { throw "Docker failed to build/start. Fix error above and re-run." }
-  Pop-Location
+  try {
+    docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d --build
+    if ($LASTEXITCODE -ne 0) { throw "Docker failed to build/start. Fix error above and re-run." }
+  } finally {
+    Pop-Location
+  }
 
   Ok "vilinks is running (Docker)"
 }

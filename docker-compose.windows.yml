@@ -1,0 +1,3 @@
+services:
+  vilinks:
+    user: "0:0"
