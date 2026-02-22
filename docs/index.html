@@ -1,157 +1,163 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>vilinks — install</title>
-  <meta name="description" content="Install vilinks — a lightweight local go/ alternative URL shortener." />
-  <link rel="stylesheet" href="/assets/theme.css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>vilinks · install</title>
+    <meta name="description" content="Install vilinks — a lightweight local go/ alternative URL shortener."/>
+    <link rel="stylesheet" href="/assets/theme.css"/>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <meta name="theme-color" content="#ff1f2d">
 </head>
 <body>
-  <div class="wrap">
+<div class="wrap">
     <div class="nav">
-      <div class="brand">
-        <div class="logo">vi/</div>
-        <div>vilinks <span style="opacity:.55; font-weight:800;">· install</span></div>
-      </div>
-      <div class="navLinks">
-        <a class="pill" href="/install-mac/">macOS/Linux</a>
-        <a class="pill" href="/install-win/">Windows</a>
-        <a class="pill" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
-      </div>
+        <div class="brand">
+            <div class="logo">vi/</div>
+            <div>vilinks <span style="opacity:.55; font-weight:800;">· install</span></div>
+        </div>
+        <div class="navLinks">
+            <a class="pill" href="/install-mac/">macOS/Linux</a>
+            <a class="pill" href="/install-win/">Windows</a>
+            <a class="pill" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+        </div>
     </div>
 
     <div class="card" style="margin-top:18px;">
-      <div class="pad">
-        <div class="hero">
-          <div>
-            <h1 class="hTitle">Install <span class="accent">vilinks</span>.</h1>
-            <p class="sub">
-              A lightweight <b>go/</b> alternative you run locally. Pick your OS guide below.
-              After install, open <code style="font-family:var(--mono)">http://127.0.0.1:8765/</code> (always works).
-              Optional: enable <code style="font-family:var(--mono)">http://vi/</code>.
-            </p>
-
-            <div class="chips">
-              <div class="chip"><span class="dot"></span> Local-first (SQLite)</div>
-              <div class="chip"><span class="dot"></span> Docker or Python</div>
-              <div class="chip"><span class="dot"></span> Custom prefix (vi/)</div>
-              <div class="chip"><span class="dot"></span> Hits + edit/delete</div>
-            </div>
-
-            <div class="section" style="margin-top:16px;">
-              <h3 style="font-family:var(--display); margin:0 0 8px;">One-command install</h3>
-              <div class="codeRow">
-                <div class="codebox">
-                  <pre id="cmdUnix">curl -fsSL https://mac.vilinks.org | bash</pre>
-                </div>
-                <button class="btn primary" id="copyUnix">Copy (macOS/Linux)</button>
-              </div>
-
-              <div class="codeRow">
-                <div class="codebox">
-                  <pre id="cmdWin">iwr -useb https://win.vilinks.org | iex</pre>
-                </div>
-                <button class="btn primary" id="copyWin">Copy (Windows)</button>
-              </div>
-
-              <div class="hint">
-                Open <code>http://127.0.0.1:8765/</code> or <code>http://localhost:8765/</code>.
-                Pretty URL <code>http://vi/</code> requires admin/root (hosts + port 80 forwarding).
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="background:rgba(15,15,22,.55); border-color:rgba(255,255,255,.12);">
-            <div class="pad">
-              <h3 style="margin:0 0 10px; font-family:var(--display);">Choose your guide</h3>
-
-              <div class="grid2">
-                <div class="pane">
-                  <h3>macOS / Linux</h3>
-                  <p>Default guide. Cleanest experience. Optional pf/iptables for <code>http://vi/</code>.</p>
-                  <a class="btn primary" href="/install-mac/">Open guide →</a>
-                </div>
-
-                <div class="pane">
-                  <h3>Windows</h3>
-                  <p>Includes Docker override notes + portproxy steps for <code>http://vi/</code>.</p>
-                  <a class="btn primary" href="/install-win/">Open guide →</a>
-                </div>
-              </div>
-
-              <div class="footer" style="margin-top:18px;">
-                <div>install.vilinks.org</div>
+        <div class="pad">
+            <div class="hero">
                 <div>
-                  <a href="/install-mac/">macOS/Linux</a>
-                  <span style="opacity:.35;"> · </span>
-                  <a href="/install-win/">Windows</a>
+                    <h1 class="hTitle">Install <span class="accent">vilinks</span>.</h1>
+                    <p class="sub">
+                        A lightweight <b>go/</b> alternative you run locally. Pick your OS guide below.
+                        After install, open <code style="font-family:var(--mono)">http://127.0.0.1:8765/</code> (always
+                        works).
+                        Optional: enable <code style="font-family:var(--mono)">http://vi/</code>.
+                    </p>
+
+                    <div class="chips">
+                        <div class="chip"><span class="dot"></span> Local-first (SQLite)</div>
+                        <div class="chip"><span class="dot"></span> Docker or Python</div>
+                        <div class="chip"><span class="dot"></span> Custom prefix (vi/)</div>
+                        <div class="chip"><span class="dot"></span> Hits + edit/delete</div>
+                    </div>
+
+                    <div class="section" style="margin-top:16px;">
+                        <h3 style="font-family:var(--display); margin:0 0 8px;">One-command install</h3>
+                        <div class="codeRow">
+                            <div class="codebox">
+                                <pre id="cmdUnix">curl -fsSL https://mac.vilinks.org | bash</pre>
+                            </div>
+                            <button class="btn primary" id="copyUnix">Copy (macOS/Linux)</button>
+                        </div>
+
+                        <div class="codeRow">
+                            <div class="codebox">
+                                <pre id="cmdWin">iwr -useb https://win.vilinks.org | iex</pre>
+                            </div>
+                            <button class="btn primary" id="copyWin">Copy (Windows)</button>
+                        </div>
+
+                        <div class="hint">
+                            Open <code>http://127.0.0.1:8765/</code> or <code>http://localhost:8765/</code>.
+                            Pretty URL <code>http://vi/</code> requires admin/root (hosts + port 80 forwarding).
+                        </div>
+                    </div>
                 </div>
-              </div>
+
+                <div class="card" style="background:rgba(15,15,22,.55); border-color:rgba(255,255,255,.12);">
+                    <div class="pad">
+                        <h3 style="margin:0 0 10px; font-family:var(--display);">Choose your guide</h3>
+
+                        <div class="grid2">
+                            <div class="pane">
+                                <h3>macOS / Linux</h3>
+                                <p>Default guide. Cleanest experience. Optional pf/iptables for <code>http://vi/</code>.
+                                </p>
+                                <a class="btn primary" href="/install-mac/">Open guide →</a>
+                            </div>
+
+                            <div class="pane">
+                                <h3>Windows</h3>
+                                <p>Includes Docker override notes + portproxy steps for <code>http://vi/</code>.</p>
+                                <a class="btn primary" href="/install-win/">Open guide →</a>
+                            </div>
+                        </div>
+
+                        <div class="footer" style="margin-top:18px;">
+                            <div>install.vilinks.org</div>
+                            <div>
+                                <a href="/install-mac/">macOS/Linux</a>
+                                <span style="opacity:.35;"> · </span>
+                                <a href="/install-win/">Windows</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="section" style="margin-top:18px;">
-          <h3 style="font-family:var(--display);">What you get</h3>
-          <p>Create short links in a clean UI, then open <code>/alias</code> to redirect. Everything is local.</p>
+            <div class="section" style="margin-top:18px;">
+                <h3 style="font-family:var(--display);">What you get</h3>
+                <p>Create short links in a clean UI, then open <code>/alias</code> to redirect. Everything is local.</p>
 
-          <div class="grid2">
-            <div class="pane">
-              <h3>Local DB</h3>
-              <p>SQLite stored in your home directory. Easy to back up and restore.</p>
+                <div class="grid2">
+                    <div class="pane">
+                        <h3>Local DB</h3>
+                        <p>SQLite stored in your home directory. Easy to back up and restore.</p>
+                    </div>
+                    <div class="pane">
+                        <h3>Fast redirects</h3>
+                        <p>302 redirects with hit counts and last-hit tracking.</p>
+                    </div>
+                </div>
             </div>
-            <div class="pane">
-              <h3>Fast redirects</h3>
-              <p>302 redirects with hit counts and last-hit tracking.</p>
+
+            <div class="section" style="margin-top:18px;">
+                <h3 style="font-family:var(--display);">Troubleshooting</h3>
+
+                <details>
+                    <summary>Common: What URLs should I use?</summary>
+                    <p>
+                        Always works: <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
+                        Pretty URL: <code>http://vi/</code> requires hosts + port 80 forwarding.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>Common: Why does http://vi/ fail but :8765 works?</summary>
+                    <p>
+                        <code>http://vi/</code> needs hosts entry (<code>127.0.0.1 vi</code>) and port 80 → 8765
+                        forwarding.
+                        Skip admin changes? Use <code>:8765</code>.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>Windows: Docker “unable to open database file”</summary>
+                    <p>
+                        Windows bind-mount permissions. Use the Windows override compose file inside the repo:
+                        <code>docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d --build</code>.
+                    </p>
+                </details>
             </div>
-          </div>
+
+            <div class="footer">
+                <div>vilinks — local go/ alternative</div>
+                <div>
+                    <a href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+                    <span style="opacity:.35;"> · </span>
+                    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;">Back to top</a>
+                </div>
+            </div>
         </div>
-
-        <div class="section" style="margin-top:18px;">
-          <h3 style="font-family:var(--display);">Troubleshooting</h3>
-
-          <details>
-            <summary>Common: What URLs should I use?</summary>
-            <p>
-              Always works: <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
-              Pretty URL: <code>http://vi/</code> requires hosts + port 80 forwarding.
-            </p>
-          </details>
-
-          <details>
-            <summary>Common: Why does http://vi/ fail but :8765 works?</summary>
-            <p>
-              <code>http://vi/</code> needs hosts entry (<code>127.0.0.1 vi</code>) and port 80 → 8765 forwarding.
-              Skip admin changes? Use <code>:8765</code>.
-            </p>
-          </details>
-
-          <details>
-            <summary>Windows: Docker “unable to open database file”</summary>
-            <p>
-              Windows bind-mount permissions. Use the Windows override compose file inside the repo:
-              <code>docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d --build</code>.
-            </p>
-          </details>
-        </div>
-
-        <div class="footer">
-          <div>vilinks — local go/ alternative</div>
-          <div>
-            <a href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
-            <span style="opacity:.35;"> · </span>
-            <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;">Back to top</a>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script src="/assets/site.js"></script>
-  <script>
+<script src="/assets/site.js"></script>
+<script>
     wireCopy("copyUnix", () => document.getElementById("cmdUnix").textContent.trim());
     wireCopy("copyWin", () => document.getElementById("cmdWin").textContent.trim());
-  </script>
+</script>
 </body>
 </html>
