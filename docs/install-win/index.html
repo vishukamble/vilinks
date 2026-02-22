@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vilinks — install (Windows)</title>
+  <meta name="description" content="Install vilinks on Windows." />
+  <link rel="stylesheet" href="/assets/theme.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">
+        <div class="logo">vi/</div>
+        <div>vilinks <span style="opacity:.55; font-weight:800;">· Windows</span></div>
+      </div>
+      <div class="navLinks">
+        <a class="pill" href="/">Home</a>
+        <a class="pill" href="/install-mac/">macOS/Linux</a>
+        <a class="pill" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <div class="pad">
+        <h1 class="hTitle" style="font-size:40px;">Install <span class="accent">Windows</span></h1>
+        <p class="sub">
+          One command. Then open <code style="font-family:var(--mono)">http://127.0.0.1:8765/</code>.
+          Optional: enable <code style="font-family:var(--mono)">http://vi/</code> (requires Administrator).
+        </p>
+
+        <div class="codeRow">
+          <div class="codebox"><pre id="cmd">powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/install.ps1 | iex"</pre></div>
+          <button class="btn primary" id="copy">Copy</button>
+        </div>
+
+        <div class="hint">
+          Always works: <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
+          Health: <code>http://127.0.0.1:8765/healthz</code>.
+        </div>
+
+        <div class="section">
+          <h3 style="font-family:var(--display);">Troubleshooting (Windows)</h3>
+
+          <details>
+            <summary>Pretty URL (http://vi/) doesn’t work</summary>
+            <p>
+              Pretty URL requires admin: hosts + portproxy (80 → 8765). Verify:
+              <code>nslookup vi</code> and <code>netsh interface portproxy show v4tov4</code>.
+              Also check IP Helper: <code>Get-Service iphlpsvc</code>.
+            </p>
+          </details>
+
+          <details>
+            <summary>Docker: “unable to open database file”</summary>
+            <p>
+              Windows bind-mount permissions. Use the Windows override compose file in the repo:
+              <code>docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d --build</code>.
+            </p>
+          </details>
+
+          <details>
+            <summary>Installer prints ??? characters</summary>
+            <p>
+              That’s your terminal/font not rendering Unicode symbols. Scripts should prefer ASCII markers
+              (<code>-></code>, <code>[OK]</code>, <code>[!!]</code>).
+            </p>
+          </details>
+        </div>
+
+        <div class="section">
+          <h3 style="font-family:var(--display);">Uninstall</h3>
+          <div class="codeRow">
+            <div class="codebox"><pre id="un">powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/uninstall.ps1 | iex"</pre></div>
+            <button class="btn" id="copyUn">Copy uninstall</button>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>install.vilinks.org</div>
+          <div>
+            <a href="/">Home</a>
+            <span style="opacity:.35;"> · </span>
+            <a href="/install-mac/">macOS/Linux</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/site.js"></script>
+  <script>
+    wireCopy("copy", () => document.getElementById("cmd").textContent.trim());
+    wireCopy("copyUn", () => document.getElementById("un").textContent.trim());
+  </script>
+</body>
+</html>

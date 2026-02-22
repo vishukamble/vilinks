@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vilinks — install (macOS/Linux)</title>
+  <meta name="description" content="Install vilinks on macOS/Linux." />
+  <link rel="stylesheet" href="/assets/theme.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">
+        <div class="logo">vi/</div>
+        <div>vilinks <span style="opacity:.55; font-weight:800;">· macOS/Linux</span></div>
+      </div>
+      <div class="navLinks">
+        <a class="pill" href="/">Home</a>
+        <a class="pill" href="/install-win/">Windows</a>
+        <a class="pill" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <div class="pad">
+        <h1 class="hTitle" style="font-size:40px;">Install <span class="accent">macOS/Linux</span></h1>
+        <p class="sub">
+          One command. Then open <code style="font-family:var(--mono)">http://127.0.0.1:8765/</code>.
+          Optional: enable <code style="font-family:var(--mono)">http://vi/</code> during install (requires sudo).
+        </p>
+
+        <div class="codeRow">
+          <div class="codebox"><pre id="cmd">bash -c "$(curl -fsSL https://raw.githubusercontent.com/vishukamble/vilinks/main/install.sh)"</pre></div>
+          <button class="btn primary" id="copy">Copy</button>
+        </div>
+
+        <div class="hint">
+          Always works: <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
+          Health: <code>curl -s http://127.0.0.1:8765/healthz</code>.
+        </div>
+
+        <div class="section">
+          <h3 style="font-family:var(--display);">Troubleshooting (macOS/Linux)</h3>
+
+          <details>
+            <summary>macOS: http://vi/ doesn’t work</summary>
+            <p>
+              macOS uses pf for port 80 forwarding. If port 80 is already in use, stick to <code>:8765</code>.
+              You can inspect pf rules with <code>sudo pfctl -sr</code>.
+            </p>
+          </details>
+
+          <details>
+            <summary>Linux: http://vi/ doesn’t work</summary>
+            <p>
+              Linux uses iptables for port 80 forwarding. Verify:
+              <code>sudo iptables -t nat -S | grep 80</code>.
+              Some distros don’t persist rules after reboot—re-run installer if needed.
+            </p>
+          </details>
+        </div>
+
+        <div class="section">
+          <h3 style="font-family:var(--display);">Uninstall</h3>
+          <div class="codeRow">
+            <div class="codebox"><pre id="un">bash -c "$(curl -fsSL https://raw.githubusercontent.com/vishukamble/vilinks/main/uninstall.sh)"</pre></div>
+            <button class="btn" id="copyUn">Copy uninstall</button>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>install.vilinks.org</div>
+          <div>
+            <a href="/">Home</a>
+            <span style="opacity:.35;"> · </span>
+            <a href="/install-win/">Windows</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/site.js"></script>
+  <script>
+    wireCopy("copy", () => document.getElementById("cmd").textContent.trim());
+    wireCopy("copyUn", () => document.getElementById("un").textContent.trim());
+  </script>
+</body>
+</html>

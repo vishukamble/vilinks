@@ -1,796 +1,157 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>vilinks — local go/ alternative</title>
-    <meta name="description"
-          content="vilinks is a lightweight local URL shortener (go/ alternative). Run it locally with Docker or Python, use vi/ in your browser, and customize everything."/>
-
-    <style>
-        :root {
-            --bg0: #0f1118;
-            --bg1: #141726;
-            --bg2: #1b1f33;
-            --card: #171a2a;
-            --border: rgba(255, 255, 255, .08);
-            --text: #e8ebff;
-            --muted: rgba(232, 235, 255, .65);
-            --muted2: rgba(232, 235, 255, .45);
-            --blue: #6c9eff;
-            --teal: #56d4c0;
-            --red: #ff6b7a;
-            --shadow: 0 10px 30px rgba(0, 0, 0, .35);
-            --radius: 16px;
-            --radius2: 12px;
-            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-            --grad: linear-gradient(135deg, rgba(108, 158, 255, .95) 0%, rgba(86, 212, 192, .95) 100%);
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
-        body {
-            margin: 0;
-            font-family: var(--sans);
-            color: var(--text);
-            background: radial-gradient(1000px 600px at 10% -10%, rgba(108, 158, 255, .12), transparent 55%),
-            radial-gradient(900px 500px at 90% 0%, rgba(86, 212, 192, .10), transparent 55%),
-            radial-gradient(900px 500px at 80% 120%, rgba(180, 144, 255, .08), transparent 55%),
-            var(--bg0);
-            min-height: 100vh;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none
-        }
-
-        a:hover {
-            opacity: .92
-        }
-
-        .wrap {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 28px 20px 60px;
-        }
-
-        .nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 18px;
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            background: rgba(15, 17, 24, .55);
-            backdrop-filter: blur(14px);
-            box-shadow: 0 6px 22px rgba(0, 0, 0, .25);
-            position: sticky;
-            top: 16px;
-            z-index: 20;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            letter-spacing: .2px
-        }
-
-        .logo {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: var(--grad);
-            display: grid;
-            place-items: center;
-            font-family: var(--mono);
-            color: #0f1118;
-            font-weight: 900;
-            font-size: 12px;
-        }
-
-        .navlinks {
-            display: flex;
-            gap: 14px;
-            color: var(--muted);
-            font-size: 13px
-        }
-
-        .navlinks a {
-            padding: 8px 10px;
-            border-radius: 10px
-        }
-
-        .navlinks a:hover {
-            background: rgba(255, 255, 255, .05);
-            color: var(--text)
-        }
-
-        .cta {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn {
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .03);
-            color: var(--text);
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: .15s ease;
-            user-select: none;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            background: rgba(255, 255, 255, .05)
-        }
-
-        .btn.primary {
-            border: none;
-            background: var(--grad);
-            color: #0f1118;
-        }
-
-        .btn.danger {
-            border: 1px solid rgba(255, 107, 122, .35);
-            background: rgba(255, 107, 122, .10);
-            color: var(--text);
-        }
-
-        .hero {
-            margin-top: 22px;
-            display: grid;
-            grid-template-columns: 1.1fr .9fr;
-            gap: 18px
-        }
-
-        .card {
-            border: 1px solid var(--border);
-            background: rgba(23, 26, 42, .65);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .card.pad {
-            padding: 22px
-        }
-
-        .headline {
-            font-size: 38px;
-            line-height: 1.04;
-            letter-spacing: -.8px;
-            margin: 0 0 10px;
-        }
-
-        .sub {
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.65;
-            margin: 0 0 18px;
-        }
-
-        .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px
-        }
-
-        .chip {
-            padding: 8px 10px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 99px;
-            background: rgba(86, 212, 192, .9)
-        }
-
-        .dot.b {
-            background: rgba(108, 158, 255, .9)
-        }
-
-        .dot.p {
-            background: rgba(180, 144, 255, .9)
-        }
-
-        /* Install block (top priority) */
-        .installTop {
-            padding: 18px;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(255, 255, 255, .04), transparent),
-            rgba(15, 17, 24, .35);
-        }
-
-        .installTitle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .installTitle h2 {
-            margin: 0;
-            font-size: 14px;
-            letter-spacing: .2px;
-            color: var(--muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .toggle {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .toggle button {
-            font-family: var(--sans);
-            padding: 8px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .03);
-            color: var(--muted);
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .toggle button.active {
-            background: rgba(108, 158, 255, .12);
-            color: var(--text);
-            border-color: rgba(108, 158, 255, .25);
-        }
-
-        .cmdRow {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-            flex-wrap: wrap;
-        }
-
-        .codebox {
-            flex: 1 1 520px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: rgba(0, 0, 0, .25);
-            padding: 14px 14px;
-            overflow: auto;
-            position: relative;
-        }
-
-        pre {
-            margin: 0;
-            font-family: var(--mono);
-            font-size: 13px;
-            color: rgba(232, 235, 255, .92);
-            line-height: 1.55;
-            white-space: pre;
-        }
-
-        .copyBtn {
-            flex: 0 0 auto;
-            min-width: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hint {
-            margin-top: 10px;
-            color: var(--muted2);
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .hint code {
-            font-family: var(--mono);
-            color: rgba(86, 212, 192, .95);
-            background: rgba(86, 212, 192, .08);
-            padding: 2px 6px;
-            border-radius: 8px;
-            border: 1px solid rgba(86, 212, 192, .15);
-        }
-
-        .grid2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-top: 18px
-        }
-
-        .miniTitle {
-            font-size: 13px;
-            margin: 0 0 8px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .2px
-        }
-
-        .kv {
-            display: grid;
-            gap: 8px;
-            margin-top: 10px
-        }
-
-        .kv div {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, .03)
-        }
-
-        .kv span {
-            color: var(--muted);
-            font-size: 13px
-        }
-
-        .kv b {
-            font-family: var(--mono);
-            font-size: 13px;
-            color: rgba(232, 235, 255, .9);
-            font-weight: 700
-        }
-
-        .section {
-            margin-top: 26px
-        }
-
-        .section h3 {
-            margin: 0 0 10px;
-            font-size: 18px;
-            letter-spacing: -.2px
-        }
-
-        .section p {
-            margin: 0 0 10px;
-            color: var(--muted);
-            line-height: 1.7;
-            font-size: 14px
-        }
-
-        .bullets {
-            display: grid;
-            gap: 10px;
-            margin-top: 10px
-        }
-
-        .bullet {
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .03);
-            border-radius: 14px;
-            padding: 14px;
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .bullet b {
-            color: var(--text)
-        }
-
-        .bullet code {
-            font-family: var(--mono);
-            color: rgba(108, 158, 255, .95);
-        }
-
-        .faq {
-            display: grid;
-            gap: 12px
-        }
-
-        details {
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, .03);
-            border-radius: 14px;
-            padding: 14px 14px;
-        }
-
-        summary {
-            cursor: pointer;
-            color: var(--text);
-            font-weight: 700
-        }
-
-        details p {
-            margin: 10px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.7
-        }
-
-        details code {
-            font-family: var(--mono);
-        }
-
-        .footer {
-            margin-top: 34px;
-            border-top: 1px solid var(--border);
-            padding-top: 18px;
-            color: var(--muted2);
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        @media (max-width: 900px) {
-            .hero {
-                grid-template-columns:1fr
-            }
-
-            .headline {
-                font-size: 32px
-            }
-
-            .navlinks {
-                display: none
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>vilinks — install</title>
+  <meta name="description" content="Install vilinks — a lightweight local go/ alternative URL shortener." />
+  <link rel="stylesheet" href="/assets/theme.css" />
 </head>
-
 <body>
-<div class="wrap">
+  <div class="wrap">
     <div class="nav">
-        <div class="brand">
-            <div class="logo">vi/</div>
-            <div>vilinks</div>
-        </div>
-
-        <div class="navlinks">
-            <a href="#features">Features</a>
-            <a href="#usage">Usage</a>
-            <a href="#config">Config</a>
-            <a href="#uninstall">Uninstall</a>
-            <a href="#faq">FAQ</a>
-        </div>
-
-        <div class="cta">
-            <a class="btn" id="ghLink" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
-            <button class="btn primary" id="copyInstallTop">Copy install</button>
-        </div>
+      <div class="brand">
+        <div class="logo">vi/</div>
+        <div>vilinks <span style="opacity:.55; font-weight:800;">· install</span></div>
+      </div>
+      <div class="navLinks">
+        <a class="pill" href="/install-mac/">macOS/Linux</a>
+        <a class="pill" href="/install-win/">Windows</a>
+        <a class="pill" href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+      </div>
     </div>
 
-    <!-- TOP PRIORITY: INSTALL -->
     <div class="card" style="margin-top:18px;">
-        <div class="installTop">
-            <div class="installTitle">
-                <h2>Install (one command)</h2>
-                <div class="toggle" role="tablist" aria-label="OS toggle">
-                    <button class="active" id="tabWin" type="button">Windows</button>
-                    <button id="tabUnix" type="button">macOS / Linux</button>
-                </div>
+      <div class="pad">
+        <div class="hero">
+          <div>
+            <h1 class="hTitle">Install <span class="accent">vilinks</span>.</h1>
+            <p class="sub">
+              A lightweight <b>go/</b> alternative you run locally. Pick your OS guide below.
+              After install, open <code style="font-family:var(--mono)">http://127.0.0.1:8765/</code> (always works).
+              Optional: enable <code style="font-family:var(--mono)">http://vi/</code>.
+            </p>
+
+            <div class="chips">
+              <div class="chip"><span class="dot"></span> Local-first (SQLite)</div>
+              <div class="chip"><span class="dot"></span> Docker or Python</div>
+              <div class="chip"><span class="dot"></span> Custom prefix (vi/)</div>
+              <div class="chip"><span class="dot"></span> Hits + edit/delete</div>
             </div>
 
-            <div class="cmdRow">
-                <div class="codebox" aria-label="Install command">
-                    <pre id="installCmd"></pre>
+            <div class="section" style="margin-top:16px;">
+              <h3 style="font-family:var(--display); margin:0 0 8px;">One-command install</h3>
+              <div class="codeRow">
+                <div class="codebox">
+                  <pre id="cmdUnix">bash -c "$(curl -fsSL https://raw.githubusercontent.com/vishukamble/vilinks/main/install.sh)"</pre>
                 </div>
-                <button class="btn primary copyBtn" id="copyInstall">Copy</button>
-            </div>
+                <button class="btn primary" id="copyUnix">Copy (macOS/Linux)</button>
+              </div>
 
-            <div class="hint">
-                After install, open <code>http://127.0.0.1:8765/</code> (always works).
-                Optional: enable <code>http://vi/</code> during install (requires admin + port 80 forwarding).
+              <div class="codeRow">
+                <div class="codebox">
+                  <pre id="cmdWin">powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/install.ps1 | iex"</pre>
+                </div>
+                <button class="btn primary" id="copyWin">Copy (Windows)</button>
+              </div>
+
+              <div class="hint">
+                Open <code>http://127.0.0.1:8765/</code> or <code>http://localhost:8765/</code>.
+                Pretty URL <code>http://vi/</code> requires admin/root (hosts + port 80 forwarding).
+              </div>
             </div>
+          </div>
+
+          <div class="card" style="background:rgba(15,15,22,.55); border-color:rgba(255,255,255,.12);">
+            <div class="pad">
+              <h3 style="margin:0 0 10px; font-family:var(--display);">Choose your guide</h3>
+
+              <div class="grid2">
+                <div class="pane">
+                  <h3>macOS / Linux</h3>
+                  <p>Default guide. Cleanest experience. Optional pf/iptables for <code>http://vi/</code>.</p>
+                  <a class="btn primary" href="/install-mac/">Open guide →</a>
+                </div>
+
+                <div class="pane">
+                  <h3>Windows</h3>
+                  <p>Includes Docker override notes + portproxy steps for <code>http://vi/</code>.</p>
+                  <a class="btn primary" href="/install-win/">Open guide →</a>
+                </div>
+              </div>
+
+              <div class="footer" style="margin-top:18px;">
+                <div>install.vilinks.org</div>
+                <div>
+                  <a href="/install-mac/">macOS/Linux</a>
+                  <span style="opacity:.35;"> · </span>
+                  <a href="/install-win/">Windows</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="card pad">
-            <div class="hero">
-                <div>
-                    <h1 class="headline">A lightweight <span
-                            style="background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">go/</span>
-                        alternative you run locally.</h1>
-                    <p class="sub">
-                        Create short links in a clean UI, then use <b>vi/alias</b> in your browser to redirect.
-                        Stores data locally in SQLite. Easy to install, easy to customize, and open-source.
-                    </p>
+        <div class="section" style="margin-top:18px;">
+          <h3 style="font-family:var(--display);">What you get</h3>
+          <p>Create short links in a clean UI, then open <code>/alias</code> to redirect. Everything is local.</p>
 
-                    <div class="chips">
-                        <div class="chip"><span class="dot"></span> Local-first (SQLite)</div>
-                        <div class="chip"><span class="dot b"></span> Docker or Python</div>
-                        <div class="chip"><span class="dot p"></span> Custom prefix (vi/)</div>
-                        <div class="chip"><span class="dot"></span> Hit counts + edit/delete</div>
-                    </div>
-
-                    <div class="section" style="margin-top:18px;">
-                        <h3 style="margin-bottom:8px;">Quick usage</h3>
-                        <div class="bullets">
-                            <div class="bullet"><b>Create</b> a link in the UI: <code>docs</code> → <code>https://docs.example.com</code>
-                            </div>
-                            <div class="bullet"><b>Open</b> it: <code>http://127.0.0.1:8765/docs</code> (or <code>http://vi/docs</code>
-                                if enabled)
-                            </div>
-                            <div class="bullet"><b>Health check</b>: <code>http://127.0.0.1:8765/healthz</code></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card pad" style="background:rgba(23,26,42,.55)">
-                    <div class="miniTitle">Defaults</div>
-                    <div class="kv">
-                        <div><span>Prefix</span><b>vi</b></div>
-                        <div><span>Port</span><b>8765</b></div>
-                        <div><span>DB</span><b>~/.vilinks/vilinks.db</b></div>
-                        <div><span>URL</span><b>http://127.0.0.1:8765/</b></div>
-                    </div>
-
-                    <div class="section" style="margin-top:18px;">
-                        <h3 style="font-size:16px; margin-bottom:8px;">Install scripts</h3>
-                        <p style="margin:0; font-size:13px;">
-                            The installer prompts for prefix + port and supports:
-                            Docker install, Python install, and optional <b>http://vi/</b> pretty URL.
-                        </p>
-
-                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-                            <a class="btn" href="#uninstall">Uninstall</a>
-                            <a class="btn" href="#config">Configuration</a>
-                            <a class="btn" href="#faq">Troubleshooting</a>
-                        </div>
-                    </div>
-                </div>
+          <div class="grid2">
+            <div class="pane">
+              <h3>Local DB</h3>
+              <p>SQLite stored in your home directory. Easy to back up and restore.</p>
             </div>
-
-            <div id="features" class="section">
-                <h3>Features</h3>
-                <p>Everything is local and customizable. No external services required.</p>
-                <div class="grid2">
-                    <div class="bullet"><b>Local DB</b><br/>SQLite stored under your home directory (portable + easy to
-                        backup).
-                    </div>
-                    <div class="bullet"><b>Fast redirects</b><br/>Open <code>/alias</code> and get a 302 redirect.
-                        Tracks hit count + last hit timestamp.
-                    </div>
-                    <div class="bullet"><b>Minimal UI</b><br/>Create / edit / delete links. Clean layout that you can
-                        restyle easily.
-                    </div>
-                    <div class="bullet"><b>Install options</b><br/>Docker or Python venv. Windows and mac/linux
-                        installers included.
-                    </div>
-                </div>
+            <div class="pane">
+              <h3>Fast redirects</h3>
+              <p>302 redirects with hit counts and last-hit tracking.</p>
             </div>
-
-            <div id="usage" class="section">
-                <h3>Usage</h3>
-                <p>
-                    Use the UI to create links, then open the short URL:
-                    <code>http://127.0.0.1:8765/&lt;alias&gt;</code>.
-                    If you enable the pretty URL, you can use <code>http://vi/&lt;alias&gt;</code>.
-                </p>
-                <div class="bullets">
-                    <div class="bullet"><b>Always works:</b> <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>
-                    </div>
-                    <div class="bullet"><b>Pretty URL:</b> <code>http://vi/</code> (requires admin + port 80 forwarding)
-                    </div>
-                </div>
-            </div>
-
-            <div id="config" class="section">
-                <h3>Configuration</h3>
-                <p>Set environment variables or edit the generated config file:</p>
-                <div class="bullet" style="margin-top:10px;">
-                    <b>Windows:</b> <code>%LOCALAPPDATA%\vilinks\config.env</code><br/>
-                    <b>macOS/Linux:</b> <code>~/.vilinks/config.env</code><br/><br/>
-                    <b>Common vars:</b> <code>VILINKS_PREFIX</code>, <code>VILINKS_PORT</code>, <code>VILINKS_DB</code>,
-                    <code>VILINKS_BASE_URL</code>
-                </div>
-            </div>
-
-            <div id="uninstall" class="section">
-                <h3>Uninstall</h3>
-                <p>One command uninstall (stops Docker/Python, removes install dirs; admin cleans hosts/portproxy).</p>
-
-                <div class="grid2">
-                    <div class="bullet">
-                        <b>Windows</b><br/>
-                        <code id="uninstallWin" style="display:block; margin-top:8px; font-family:var(--mono);">
-                            powershell -ExecutionPolicy Bypass -Command "iwr -useb
-                            https://raw.githubusercontent.com/vishukamble/vilinks/main/uninstall.ps1 | iex"
-                        </code>
-                        <div style="margin-top:10px;">
-                            <button class="btn" id="copyUninstallWin">Copy</button>
-                        </div>
-                    </div>
-
-                    <div class="bullet">
-                        <b>macOS / Linux</b><br/>
-                        <code id="uninstallUnix" style="display:block; margin-top:8px; font-family:var(--mono);">
-                            bash -c "$(curl -fsSL
-                            https://raw.githubusercontent.com/vishukamble/vilinks/main/uninstall.sh)"
-                        </code>
-                        <div style="margin-top:10px;">
-                            <button class="btn" id="copyUninstallUnix">Copy</button>
-                        </div>
-                    </div>
-                </div>
-
-                <p style="margin-top:10px; color:var(--muted2);">
-                    Tip: if you want “keep DB, reinstall UI”, you can add a flag later (e.g. <code>--keep-data</code>).
-                </p>
-            </div>
-
-            <div id="faq" class="section">
-                <h3>FAQ & Troubleshooting</h3>
-
-                <div class="faq">
-                    <details>
-                        <summary>Common: What URLs should I use?</summary>
-                        <p>
-                            Always works:
-                            <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
-                            The “pretty” URL <code>http://vi/</code> requires admin/root changes (hosts + port 80
-                            forwarding).
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>Common: Why does http://vi/ fail but 127.0.0.1:8765 works?</summary>
-                        <p>
-                            <code>http://vi/</code> requires two things:
-                            (1) hosts entry: <code>127.0.0.1 vi</code>
-                            and (2) port 80 forwarding → 8765.
-                            If you skip the “pretty URL” step during install, <code>vi</code> won’t resolve and port 80
-                            won’t forward.
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>Windows: “unable to open database file” (Docker)</summary>
-                        <p>
-                            This is Windows bind-mount permissions. Fix:
-                            run Docker with the Windows override compose file:
-                            <code>docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d
-                                --build</code>.
-                            That override runs the container as root so SQLite can write to <code>/data</code>.
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>Windows: Pretty URL (http://vi/) doesn’t work</summary>
-                        <p>
-                            Pretty URL requires admin:
-                            hosts + portproxy.
-                            Verify:
-                            <code>nslookup vi</code> should map to <code>127.0.0.1</code>.
-                            Then check portproxy:
-                            <code>netsh interface portproxy show v4tov4</code>.
-                            Also ensure IP Helper is running:
-                            <code>Get-Service iphlpsvc</code>.
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>macOS: Pretty URL (http://vi/) doesn’t work</summary>
-                        <p>
-                            macOS uses pf for port 80 forwarding. If port 80 is already in use, vilinks will keep
-                            working on
-                            <code>http://127.0.0.1:8765/</code>.
-                            To verify pf rules:
-                            <code>sudo pfctl -sr</code> and <code>sudo pfctl -sa</code>.
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>Linux: Pretty URL (http://vi/) doesn’t work</summary>
-                        <p>
-                            Linux uses iptables for port 80 forwarding. Verify rules:
-                            <code>sudo iptables -t nat -S | grep 80</code>.
-                            Some distros don’t persist iptables rules across reboots—if it stops working after restart,
-                            re-run the installer or re-apply rules.
-                        </p>
-                    </details>
-
-                    <details>
-                        <summary>The installer prints ??? characters</summary>
-                        <p>
-                            That’s your terminal/font not rendering Unicode symbols. The scripts should use ASCII
-                            markers
-                            like <code>-></code>, <code>[OK]</code>, <code>[!!]</code> to avoid this.
-                        </p>
-                    </details>
-                </div>
-            </div>
-
-            <div class="footer">
-                <div>vilinks — local go/ alternative</div>
-                <div>
-                    <a href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
-                    <span style="opacity:.4;"> · </span>
-                    <a href="#top" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">Back to top</a>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <div class="section" style="margin-top:18px;">
+          <h3 style="font-family:var(--display);">Troubleshooting</h3>
+
+          <details>
+            <summary>Common: What URLs should I use?</summary>
+            <p>
+              Always works: <code>http://127.0.0.1:8765/</code> and <code>http://localhost:8765/</code>.
+              Pretty URL: <code>http://vi/</code> requires hosts + port 80 forwarding.
+            </p>
+          </details>
+
+          <details>
+            <summary>Common: Why does http://vi/ fail but :8765 works?</summary>
+            <p>
+              <code>http://vi/</code> needs hosts entry (<code>127.0.0.1 vi</code>) and port 80 → 8765 forwarding.
+              Skip admin changes? Use <code>:8765</code>.
+            </p>
+          </details>
+
+          <details>
+            <summary>Windows: Docker “unable to open database file”</summary>
+            <p>
+              Windows bind-mount permissions. Use the Windows override compose file inside the repo:
+              <code>docker compose -f docker-compose.yml -f docker-compose.windows.yml up -d --build</code>.
+            </p>
+          </details>
+        </div>
+
+        <div class="footer">
+          <div>vilinks — local go/ alternative</div>
+          <div>
+            <a href="https://github.com/vishukamble/vilinks" target="_blank" rel="noopener">GitHub</a>
+            <span style="opacity:.35;"> · </span>
+            <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); return false;">Back to top</a>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-    const CMD_WIN = 'powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/install.ps1 | iex"';
-    const CMD_UNIX = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/vishukamble/vilinks/main/install.sh)"';
-
-    function isWindows() {
-        const ua = (navigator.userAgent || "").toLowerCase();
-        const platform = (navigator.platform || "").toLowerCase();
-        return ua.includes("windows") || platform.includes("win");
-    }
-
-    const installCmdEl = document.getElementById("installCmd");
-    const tabWin = document.getElementById("tabWin");
-    const tabUnix = document.getElementById("tabUnix");
-
-    function setActive(os) {
-        const isWin = os === "win";
-        tabWin.classList.toggle("active", isWin);
-        tabUnix.classList.toggle("active", !isWin);
-        installCmdEl.textContent = isWin ? CMD_WIN : CMD_UNIX;
-        document.getElementById("copyInstallTop").dataset.cmd = installCmdEl.textContent;
-        document.getElementById("copyInstall").dataset.cmd = installCmdEl.textContent;
-    }
-
-    // Default to macOS/Linux. Switch only if clearly Windows.
-    setActive(isWindows() ? "win" : "unix");
-
-    tabWin.addEventListener("click", () => setActive("win"));
-    tabUnix.addEventListener("click", () => setActive("unix"));
-
-    async function copyText(text) {
-        try {
-            await navigator.clipboard.writeText(text);
-            return true;
-        } catch (e) {
-            const ta = document.createElement("textarea");
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand("copy");
-            } catch (_) {
-            }
-            document.body.removeChild(ta);
-            return true;
-        }
-    }
-
-    function wireCopy(btnId, getText) {
-        const btn = document.getElementById(btnId);
-        btn.addEventListener("click", async () => {
-            const txt = getText();
-            await copyText(txt);
-            const old = btn.textContent;
-            btn.textContent = "Copied";
-            setTimeout(() => btn.textContent = old, 900);
-        });
-    }
-
-    wireCopy("copyInstall", () => installCmdEl.textContent);
-    wireCopy("copyInstallTop", () => installCmdEl.textContent);
-    wireCopy("copyUninstallWin", () => document.getElementById("uninstallWin").textContent.trim());
-    wireCopy("copyUninstallUnix", () => document.getElementById("uninstallUnix").textContent.trim());
-</script>
+  <script src="/assets/site.js"></script>
+  <script>
+    wireCopy("copyUnix", () => document.getElementById("cmdUnix").textContent.trim());
+    wireCopy("copyWin", () => document.getElementById("cmdWin").textContent.trim());
+  </script>
 </body>
 </html>
