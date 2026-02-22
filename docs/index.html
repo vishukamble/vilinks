@@ -43,14 +43,14 @@
               <h3 style="font-family:var(--display); margin:0 0 8px;">One-command install</h3>
               <div class="codeRow">
                 <div class="codebox">
-                  <pre id="cmdUnix">bash -c "$(curl -fsSL https://raw.githubusercontent.com/vishukamble/vilinks/main/install.sh)"</pre>
+                  <pre id="cmdUnix">curl -fsSL https://mac.vilinks.org | bash</pre>
                 </div>
                 <button class="btn primary" id="copyUnix">Copy (macOS/Linux)</button>
               </div>
 
               <div class="codeRow">
                 <div class="codebox">
-                  <pre id="cmdWin">powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/install.ps1 | iex"</pre>
+                  <pre id="cmdWin">iwr -useb https://win.vilinks.org | iex</pre>
                 </div>
                 <button class="btn primary" id="copyWin">Copy (Windows)</button>
               </div>

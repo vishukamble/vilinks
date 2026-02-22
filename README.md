@@ -12,8 +12,7 @@ A tiny, local-first GoLinks-style URL shortener you can run on your own machine.
 ## Quick start (macOS / Linux)
 
 ```bash
-curl -fsSL -o /tmp/vilinks-install.sh https://raw.githubusercontent.com/vishukamble/vilinks/main/install.sh \
-  && bash /tmp/vilinks-install.sh
+curl -fsSL https://mac.vilinks.org | bash
 ```
 
 ## Quick start (Windows)
@@ -21,7 +20,7 @@ curl -fsSL -o /tmp/vilinks-install.sh https://raw.githubusercontent.com/vishukam
 Open PowerShell **as Administrator** (recommended for `http://vi/`), then:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/vishukamble/vilinks/main/install.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "iwr -useb https://win.vilinks.org | iex"
 ```
 
 If you don't run as admin, you'll still be able to use `http://vi.localhost:8765/`.
